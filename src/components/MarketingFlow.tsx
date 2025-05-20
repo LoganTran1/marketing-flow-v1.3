@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo, TouchEvent } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -181,6 +181,7 @@ const serpMetrics: Metric[] = [
 
 const SPACING = 700;
 const START_X = 100;
+const Y_POSITION = 40;  // Consistent Y position for all nodes
 
 const initialNodes: Node<NodeData>[] = [
   {
@@ -192,7 +193,7 @@ const initialNodes: Node<NodeData>[] = [
       type: 'content',
       description: 'User sees and clicks on partner advertisement'
     },
-    position: { x: START_X, y: 40 }
+    position: { x: START_X, y: Y_POSITION }
   },
   {
     id: '2',
@@ -207,7 +208,7 @@ const initialNodes: Node<NodeData>[] = [
       metrics: contentMetrics,
       link: 'https://www.nation.com/what-to-expect-at-your-first-invisalign-consultation-appointment/?var=6028076256382092669&imp=rjs&segment=google_2619374225&utm_source=google_search_networks&s1cid=22286900553&s1agid=adgroupid&placement=&s1aid=2619374225&is_pub_ref=true&utm_campaign=nation-US-en-Invisalign_Aligners-Dental_Care-9d6b7282-1893-4a00-bc52-ad6aa57f4a3e&adgroup=What_Happens_at_Your_First_Invisalign_Consultation-Invisalign_Aligners&headline=clear%20aligners%20for%20kids&optkey=clear%20aligners%20for%20kids&forcekeyA=clear%20aligners%20for%20kids&forcekeyB=invisalign%20teeth%20treatment&forcekeyC=get%20your%20first%20invisalign%20consultation%20near%20me&forcekeyD=invisalign%20aligners%20treatment&forcekeyE=invisalign%20first%20comprehensive&s1luid=2d0ce4d7-5559-4ee7-8bfc-5a55a80d65b7&s1kid=kwd-10216756&gad_source=5&gad_campaignid=22286900553&gclid=EAIaIQobChMIptC8rdavjQMV3TcIBR3WHiXJEAAYASAAEgIkpPD_BwE'
     },
-    position: { x: START_X + SPACING, y: 0 }
+    position: { x: START_X + SPACING, y: Y_POSITION }
   },
   {
     id: '3',
@@ -222,7 +223,7 @@ const initialNodes: Node<NodeData>[] = [
       metrics: serpMetrics,
       link: 'https://search.nation.com/serp?sc=2Y1eS1iaQMGh00&qc=web&is_rsoc_url=True&b=google_rsonc&q=Invisalign+Aligners+Treatment&rsToken=ChMI9JiJ6ZCwjQMVFDg0CB0ZYiFjEnMBlLqpj1SIGlaWldwEzHTcZcQViFUP1VHwSwtmzeE_mlSNCYUCMH-wFZhzIHRSVsAKZ3fotwlefxHId-pnvQkVdh9sjlMJ826trTQX3a1kK4airvynOdj2F1acUKP9VymzN0P5YFbL5ioaH4FZ031bFv4dIAM&pcsa=true&nb=0&rurl=https%3A%2F%2Fapp.snowflake.com%2F&nm=26&nx=259&ny=44&is=605x294&clkt=70'
     },
-    position: { x: START_X + (SPACING * 2), y: 0 }
+    position: { x: START_X + (SPACING * 2), y: Y_POSITION }
   }
 ];
 
@@ -308,7 +309,7 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
             setSelectedApiTerm(null);
             setSelectedMetric(null);
           }}
-          className={`px-6 py-2 rounded-full text-base font-medium transition-colors w-fit whitespace-nowrap text-center
+          className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-sm sm:text-base font-medium transition-colors w-fit whitespace-nowrap text-center
             ${(selectedParentTerm?.id === term.id || selectedTerm?.id === term.id)
               ? 'bg-blue-500 text-white shadow-md' 
               : 'bg-white text-blue-700 hover:bg-blue-50 border border-blue-200 shadow-sm'}`}
@@ -322,11 +323,11 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
     
     return (
       <div className="flex flex-col gap-4">
-        <div className="flex flex-row flex-wrap justify-start gap-4">
+        <div className="flex flex-row flex-wrap gap-2 sm:gap-4">
           {mainTerms}
         </div>
         {selectedTermWithSubs && (
-          <div className="flex flex-row flex-wrap gap-4 pl-4 border-l-2 border-blue-200">
+          <div className="flex flex-row flex-wrap gap-2 sm:gap-4 pl-4 border-l-2 border-blue-200">
             {selectedTermWithSubs.subTerms?.map((subTerm) => (
               <button
                 key={subTerm.id}
@@ -336,7 +337,7 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
                   setSelectedApiTerm(null);
                   setSelectedMetric(null);
                 }}
-                className={`px-6 py-2 rounded-full text-base font-medium transition-colors w-fit whitespace-nowrap text-center
+                className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-sm sm:text-base font-medium transition-colors w-fit whitespace-nowrap text-center
                   ${selectedTerm?.id === subTerm.id 
                     ? 'bg-blue-500 text-white shadow-md' 
                     : 'bg-white text-blue-700 hover:bg-blue-50 border border-blue-200 shadow-sm'}`}
@@ -372,53 +373,51 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
     <div className="relative">
       <div className="flex flex-col items-center">
         {/* Label on top */}
-        <div className="p-2 mb-2 text-center">
-          <h2 className="text-xl font-semibold text-gray-800 tracking-tight">{data.label}</h2>
-          <div className="mt-1 text-sm font-medium text-emerald-600">{data.description}</div>
+        <div className="p-2 mb-2 text-center w-full">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 tracking-tight">{data.label}</h2>
+          <div className="mt-1 text-xs sm:text-sm font-medium text-emerald-600 px-4">{data.description}</div>
           {data.link && (
             <a
               href={data.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 mt-1 px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
+              className="inline-flex items-center gap-1 mt-3 px-4 py-3 sm:px-3 sm:py-2 bg-blue-500 text-white text-base rounded-lg hover:bg-blue-600 transition-colors shadow-sm touch-manipulation w-full sm:w-auto justify-center sm:justify-start"
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
-              Live Link
+              <span className="text-lg sm:text-base">Live Link</span>
             </a>
           )}
         </div>
 
         {/* Content with conditional iPhone frame */}
-        <div className="relative">
+        <div className={`relative transform scale-[0.85] sm:scale-100 ${data.type === 'content' && data.screenshot === thankYouPage ? 'mt-6 sm:mt-8' : ''}`}>
           <Handle 
             type="target" 
             position={Position.Left} 
             style={{ left: '-20px', top: '50%', opacity: 0 }}
           />
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="bg-gray-800 rounded-[40px] p-3 shadow-xl">
-              <div className="relative bg-black rounded-[35px] border-[6px] border-black w-[380px]">
-                <div 
-                  className="relative overflow-hidden rounded-[28px] bg-white cursor-pointer"
-                  onClick={handleImageClick}
-                >
-                  <img 
-                    src={getImageSource()} 
-                    alt={data.label}
-                    className="w-full"
-                  />
-                  {data.screenshot === thankYouPage && (
-                    <div className="absolute top-[42%] left-0 right-0 flex justify-center">
-                      <img 
-                        src={thankYouButton} 
-                        alt="Thank you button"
-                        className="w-[60%]"
-                      />
-                    </div>
-                  )}
-                </div>
+          <div className="bg-gray-800 rounded-[40px] p-3 shadow-xl">
+            <div className="relative bg-black rounded-[35px] border-[6px] border-black w-[300px] sm:w-[380px]">
+              <div 
+                className="relative overflow-hidden rounded-[28px] bg-white cursor-pointer touch-manipulation"
+                onClick={handleImageClick}
+              >
+                <img 
+                  src={getImageSource()} 
+                  alt={data.label}
+                  className="w-full"
+                />
+                {data.screenshot === thankYouPage && (
+                  <div className="absolute top-[42%] left-0 right-0 flex justify-center">
+                    <img 
+                      src={thankYouButton} 
+                      alt="Thank you button"
+                      className="w-[60%]"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -429,21 +428,23 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
           />
         </div>
 
-        {/* Key Terms Section */}
+        {/* Key Terms Section - Enhanced mobile layout */}
         {data.keyTerms && (
-          <div ref={keyTermsRef} className="absolute top-[100%] left-1/2 -translate-x-1/2 mt-6 min-w-[560px] p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-700 mb-3">Key Terms:</h3>
-            {renderKeyTerms(data.keyTerms)}
+          <div ref={keyTermsRef} className="mt-8 sm:mt-6 bg-gray-50 rounded-lg p-4 sm:p-6 w-[95vw] sm:w-[560px] min-h-fit">
+            <h3 className="text-xl sm:text-lg font-semibold text-gray-700 mb-4 sm:mb-3">Key Terms:</h3>
+            <div className="flex flex-wrap gap-4 sm:gap-3">
+              {renderKeyTerms(data.keyTerms)}
+            </div>
             
-            {/* Term Description */}
+            {/* Term Description - Enhanced for mobile */}
             {(selectedTerm || selectedParentTerm) && (
-              <div className="mt-4 p-4 bg-white rounded-lg shadow-md border border-gray-100">
-                <div className="flex justify-between items-start gap-4">
+              <div className="mt-6 sm:mt-4 p-5 sm:p-4 bg-white rounded-lg shadow-md border border-gray-100">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
                   <div className="flex-1">
-                    <h4 className="text-lg font-medium text-gray-800">
+                    <h4 className="text-xl sm:text-lg font-medium text-gray-800">
                       {selectedTerm?.term || selectedParentTerm?.term}
                     </h4>
-                    <p className="text-base text-gray-600 mt-2 leading-relaxed">
+                    <p className="text-lg sm:text-base text-gray-600 mt-3 sm:mt-2 leading-relaxed">
                       {selectedTerm?.description || selectedParentTerm?.description}
                     </p>
                     {(selectedTerm?.term === 'Keyword Block (Widget)' || selectedParentTerm?.term === 'Keyword Block (Widget)') && (
@@ -465,18 +466,18 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
                       </div>
                     )}
                   </div>
-                  <span className="text-sm font-medium text-blue-600 px-3 py-1.5 bg-blue-50 rounded-full whitespace-nowrap">
+                  <span className="text-base sm:text-sm font-medium text-blue-600 px-4 py-2 sm:px-3 sm:py-1.5 bg-blue-50 rounded-full whitespace-nowrap self-start">
                     #{selectedTerm?.category || selectedParentTerm?.category}
                   </span>
                 </div>
               </div>
             )}
 
-            {/* API Terms Section */}
+            {/* API Terms Section - Enhanced for mobile */}
             {data.apiTerms && (
               <>
-                <h3 className="text-lg font-semibold text-gray-700 mb-3 mt-6">API Terms:</h3>
-                <div className="flex flex-wrap justify-start gap-4">
+                <h3 className="text-xl sm:text-lg font-semibold text-gray-700 mb-4 sm:mb-3 mt-8 sm:mt-6">API Terms:</h3>
+                <div className="flex flex-wrap gap-4">
                   {data.apiTerms.map((term) => (
                     <button
                       key={term.id}
@@ -485,7 +486,7 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
                         setSelectedTerm(null);
                         setSelectedMetric(null);
                       }}
-                      className={`px-4 py-2 rounded-full text-base font-medium transition-colors
+                      className={`px-5 py-3 sm:px-4 sm:py-2 rounded-full text-lg sm:text-base font-medium transition-colors w-full sm:w-auto
                         ${selectedApiTerm?.id === term.id 
                           ? 'bg-purple-500 text-white shadow-md' 
                           : 'bg-white text-purple-700 hover:bg-purple-50 border border-purple-200 shadow-sm'}`}
@@ -495,9 +496,9 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
                   ))}
                 </div>
 
-                {/* API Term Description */}
+                {/* API Term Description - Enhanced for mobile */}
                 {selectedApiTerm && (
-                  <div className="mt-4 p-4 bg-white rounded-lg shadow-md border border-gray-100">
+                  <div className="mt-6 sm:mt-4 p-5 sm:p-4 bg-white rounded-lg shadow-md border border-gray-100">
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1">
                         <h4 className="text-lg font-medium text-gray-800">{selectedApiTerm.term}</h4>
@@ -516,11 +517,11 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
               </>
             )}
 
-            {/* Metrics Section */}
+            {/* Metrics Section - Enhanced for mobile */}
             {data.metrics && (
               <>
-                <h3 className="text-lg font-semibold text-gray-700 mb-3 mt-6">Metrics:</h3>
-                <div className="flex flex-wrap justify-start gap-4">
+                <h3 className="text-xl sm:text-lg font-semibold text-gray-700 mb-4 sm:mb-3 mt-8 sm:mt-6">Metrics:</h3>
+                <div className="flex flex-wrap gap-4">
                   {data.metrics.map((metric) => (
                     <button
                       key={metric.id}
@@ -529,7 +530,7 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
                         setSelectedTerm(null);
                         setSelectedApiTerm(null);
                       }}
-                      className={`px-4 py-2 rounded-full text-base font-medium transition-colors
+                      className={`px-5 py-3 sm:px-4 sm:py-2 rounded-full text-lg sm:text-base font-medium transition-colors w-full sm:w-auto
                         ${selectedMetric?.id === metric.id 
                           ? 'bg-amber-500 text-white shadow-md' 
                           : 'bg-white text-amber-700 hover:bg-amber-50 border border-amber-200 shadow-sm'}`}
@@ -539,9 +540,9 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
                   ))}
                 </div>
 
-                {/* Metric Description */}
+                {/* Metric Description - Enhanced for mobile */}
                 {selectedMetric && (
-                  <div className="mt-4 p-4 bg-white rounded-lg shadow-md border border-gray-100">
+                  <div className="mt-6 sm:mt-4 p-5 sm:p-4 bg-white rounded-lg shadow-md border border-gray-100 mb-0">
                     <div className="flex flex-col gap-2">
                       <h4 className="text-lg font-medium text-gray-800">{selectedMetric.term}</h4>
                       <p className="text-base text-gray-600">{selectedMetric.description}</p>
@@ -565,24 +566,124 @@ const nodeTypes = {
 };
 
 export function MarketingFlow() {
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
+  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Adjust node positions based on screen size
+  const nodes = React.useMemo(() => {
+    if (isMobile) {
+      // Vertical layout for mobile
+      return initialNodes.map((node, index) => ({
+        ...node,
+        position: {
+          x: START_X,
+          y: Y_POSITION + (index * 800) // Increased vertical spacing for mobile
+        }
+      }));
+    }
+    return initialNodes;
+  }, [isMobile]);
+
+  // Adjust edges for mobile layout
+  const edges = React.useMemo(() => {
+    if (isMobile) {
+      return initialEdges.map(edge => ({
+        ...edge,
+        style: {
+          ...edge.style,
+          strokeWidth: 4, // Thicker lines for mobile
+        },
+        labelStyle: {
+          ...edge.labelStyle,
+          fontSize: 14, // Smaller font for mobile
+        }
+      }));
+    }
+    return initialEdges;
+  }, [isMobile]);
+
+  const handleTouchStart = (e: TouchEvent) => {
+    if (isMobile) {
+      setTouchStart({
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      });
+      setIsDragging(true);
+    }
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (isMobile && isDragging && containerRef.current) {
+      const deltaX = e.touches[0].clientX - touchStart.x;
+      const deltaY = e.touches[0].clientY - touchStart.y;
+      
+      // Smooth scrolling
+      containerRef.current.scrollBy({
+        left: -deltaX,
+        top: -deltaY,
+        behavior: 'smooth'
+      });
+      
+      setTouchStart({
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   return (
-    <div className="w-full h-[800px]">
+    <div 
+      ref={containerRef}
+      className="w-full h-[800px] md:h-[800px] sm:h-[2400px] touch-pan-y overscroll-none"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       <ReactFlow
-        nodes={initialNodes}
-        edges={initialEdges}
+        nodes={nodes}
+        edges={edges}
         nodeTypes={nodeTypes}
         fitView
-        minZoom={0.4}
+        minZoom={isMobile ? 0.2 : 0.4}
         maxZoom={1.5}
-        defaultViewport={{ zoom: 0.7, x: 0, y: 0 }}
+        defaultViewport={{ zoom: isMobile ? 0.4 : 0.7, x: 0, y: 0 }}
         fitViewOptions={{
-          padding: 0.3,
+          padding: isMobile ? 0.1 : 0.3,
           includeHiddenNodes: true,
+          minZoom: isMobile ? 0.2 : 0.4,
+          maxZoom: 1.5
         }}
+        className="touch-manipulation"
+        panOnDrag={!isMobile}
+        zoomOnScroll={!isMobile}
+        panOnScroll={true}
+        selectionOnDrag={false}
+        zoomOnDoubleClick={false}
       >
         <Background color="#aaa" gap={16} />
-        <Controls />
-        <MiniMap style={{ background: '#f8f8f8' }} />
+        <Controls 
+          showZoom={!isMobile}
+          className={`!bottom-4 ${isMobile ? '!left-4' : '!right-4'} !top-auto`}
+        />
+        <MiniMap 
+          style={{ background: '#f8f8f8' }}
+          className={isMobile ? 'hidden' : ''}
+        />
       </ReactFlow>
     </div>
   );
