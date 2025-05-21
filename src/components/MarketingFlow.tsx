@@ -85,15 +85,15 @@ const serpApiTerms: ApiTerm[] = [
 const leadGenTerms: KeyTerm[] = [
   {
     id: 'lg1',
-    term: 'Partner Advertisement',
-    description: 'Ads placed by our lead generation partners to attract potential customers',
-    category: 'traffic'
+    term: 'Thank You Page',
+    description: 'The page users see after completing a form or action, containing relevant offers and next steps.',
+    category: 'page'
   },
   {
     id: 'lg2',
-    term: 'Click-through',
-    description: 'When users click the ad to visit our content',
-    category: 'engagement'
+    term: 'Mid Flow',
+    description: 'The middle stage of the user journey where engagement and conversion opportunities are presented.',
+    category: 'flow'
   }
 ];
 
@@ -191,7 +191,9 @@ const initialNodes: Node<NodeData>[] = [
       label: 'Lead Gen Partner Ad',
       screenshot: thankYouPage,
       type: 'content',
-      description: 'User sees and clicks on partner advertisement'
+      description: 'User sees and clicks on partner advertisement',
+      keyTerms: leadGenTerms,
+      link: '#'
     },
     position: { x: START_X, y: Y_POSITION }
   },
@@ -371,7 +373,7 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
 
   return (
     <div className="relative">
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center max-w-[90vw] sm:max-w-none">
         {/* Label on top */}
         <div className="p-2 mb-2 text-center w-full">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-800 tracking-tight">{data.label}</h2>
@@ -381,25 +383,25 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
               href={data.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 mt-3 px-4 py-3 sm:px-3 sm:py-2 bg-blue-500 text-white text-base rounded-lg hover:bg-blue-600 transition-colors shadow-sm touch-manipulation w-full sm:w-auto justify-center sm:justify-start"
+              className={`inline-flex items-center gap-1 mt-3 px-4 py-2 bg-blue-500 text-white text-base rounded-lg hover:bg-blue-600 transition-colors shadow-sm touch-manipulation w-full sm:w-auto justify-center ${data.link === '#' ? 'invisible' : ''}`}
             >
-              <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
-              <span className="text-lg sm:text-base">Live Link</span>
+              <span>Live Link</span>
             </a>
           )}
         </div>
 
-        {/* Content with conditional iPhone frame */}
-        <div className={`relative transform scale-[0.85] sm:scale-100 ${data.type === 'content' && data.screenshot === thankYouPage ? 'mt-6 sm:mt-8' : ''}`}>
+        {/* Content with iPhone frame */}
+        <div className="relative transform scale-[0.75] sm:scale-100">
           <Handle 
             type="target" 
             position={Position.Left} 
             style={{ left: '-20px', top: '50%', opacity: 0 }}
           />
           <div className="bg-gray-800 rounded-[40px] p-3 shadow-xl">
-            <div className="relative bg-black rounded-[35px] border-[6px] border-black w-[300px] sm:w-[380px]">
+            <div className="relative bg-black rounded-[35px] border-[6px] border-black w-[280px] sm:w-[380px]">
               <div 
                 className="relative overflow-hidden rounded-[28px] bg-white cursor-pointer touch-manipulation"
                 onClick={handleImageClick}
@@ -428,56 +430,73 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
           />
         </div>
 
-        {/* Key Terms Section - Enhanced mobile layout */}
+        {/* Key Terms Section - Enhanced for horizontal mobile */}
         {data.keyTerms && (
-          <div ref={keyTermsRef} className="mt-8 sm:mt-6 bg-gray-50 rounded-lg p-4 sm:p-6 w-[95vw] sm:w-[560px] min-h-fit">
-            <h3 className="text-xl sm:text-lg font-semibold text-gray-700 mb-4 sm:mb-3">Key Terms:</h3>
-            <div className="flex flex-wrap gap-4 sm:gap-3">
+          <div 
+            ref={keyTermsRef} 
+            className="mt-4 bg-gray-50 rounded-lg p-3 sm:p-6 w-[85vw] sm:w-[560px] min-h-fit max-h-[30vh] sm:max-h-none overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-gray-700">Key Terms</h3>
+              <button 
+                onClick={() => {
+                  setSelectedTerm(null);
+                  setSelectedParentTerm(null);
+                  setSelectedApiTerm(null);
+                  setSelectedMetric(null);
+                }}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Clear
+              </button>
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
               {renderKeyTerms(data.keyTerms)}
             </div>
             
-            {/* Term Description - Enhanced for mobile */}
+            {/* Term Description - Compact for mobile */}
             {(selectedTerm || selectedParentTerm) && (
-              <div className="mt-6 sm:mt-4 p-5 sm:p-4 bg-white rounded-lg shadow-md border border-gray-100">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
-                  <div className="flex-1">
-                    <h4 className="text-xl sm:text-lg font-medium text-gray-800">
+              <div className="mt-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-start justify-between">
+                    <h4 className="text-base font-medium text-gray-800">
                       {selectedTerm?.term || selectedParentTerm?.term}
                     </h4>
-                    <p className="text-lg sm:text-base text-gray-600 mt-3 sm:mt-2 leading-relaxed">
-                      {selectedTerm?.description || selectedParentTerm?.description}
-                    </p>
-                    {(selectedTerm?.term === 'Keyword Block (Widget)' || selectedParentTerm?.term === 'Keyword Block (Widget)') && (
-                      <div className="mt-4">
-                        <img 
-                          src={keywordBlockImage} 
-                          alt="Keyword Block Example" 
-                          className="w-full rounded-lg shadow-sm"
-                        />
-                      </div>
-                    )}
-                    {selectedTerm?.term === 'Click' && (
-                      <div className="mt-4">
-                        <img 
-                          src={clickArrowImage} 
-                          alt="Click Example" 
-                          className="w-full rounded-lg shadow-sm"
-                        />
-                      </div>
-                    )}
+                    <span className="text-xs font-medium text-blue-600 px-2 py-1 bg-blue-50 rounded-full">
+                      #{selectedTerm?.category || selectedParentTerm?.category}
+                    </span>
                   </div>
-                  <span className="text-base sm:text-sm font-medium text-blue-600 px-4 py-2 sm:px-3 sm:py-1.5 bg-blue-50 rounded-full whitespace-nowrap self-start">
-                    #{selectedTerm?.category || selectedParentTerm?.category}
-                  </span>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {selectedTerm?.description || selectedParentTerm?.description}
+                  </p>
+                  {(selectedTerm?.term === 'Keyword Block (Widget)' || selectedParentTerm?.term === 'Keyword Block (Widget)') && (
+                    <div className="mt-2">
+                      <img 
+                        src={keywordBlockImage} 
+                        alt="Keyword Block Example"
+                        className="w-full rounded-lg shadow-sm"
+                      />
+                    </div>
+                  )}
+                  {(selectedTerm?.term === 'Click' || selectedParentTerm?.term === 'Click') && (
+                    <div className="mt-2">
+                      <img 
+                        src={clickArrowImage} 
+                        alt="Click Arrow Example"
+                        className="w-full rounded-lg shadow-sm"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* API Terms Section - Enhanced for mobile */}
+            {/* API Terms - Compact for mobile */}
             {data.apiTerms && (
-              <>
-                <h3 className="text-xl sm:text-lg font-semibold text-gray-700 mb-4 sm:mb-3 mt-8 sm:mt-6">API Terms:</h3>
-                <div className="flex flex-wrap gap-4">
+              <div className="mt-4">
+                <h3 className="text-base font-semibold text-gray-700 mb-2">API Terms</h3>
+                <div className="flex flex-wrap gap-2">
                   {data.apiTerms.map((term) => (
                     <button
                       key={term.id}
@@ -486,42 +505,23 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
                         setSelectedTerm(null);
                         setSelectedMetric(null);
                       }}
-                      className={`px-5 py-3 sm:px-4 sm:py-2 rounded-full text-lg sm:text-base font-medium transition-colors w-full sm:w-auto
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors
                         ${selectedApiTerm?.id === term.id 
-                          ? 'bg-purple-500 text-white shadow-md' 
-                          : 'bg-white text-purple-700 hover:bg-purple-50 border border-purple-200 shadow-sm'}`}
+                          ? 'bg-purple-500 text-white shadow-sm' 
+                          : 'bg-white text-purple-700 hover:bg-purple-50 border border-purple-200'}`}
                     >
                       {term.term}
                     </button>
                   ))}
                 </div>
-
-                {/* API Term Description - Enhanced for mobile */}
-                {selectedApiTerm && (
-                  <div className="mt-6 sm:mt-4 p-5 sm:p-4 bg-white rounded-lg shadow-md border border-gray-100">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex-1">
-                        <h4 className="text-lg font-medium text-gray-800">{selectedApiTerm.term}</h4>
-                        <p className="text-base text-gray-600 mt-2 leading-relaxed">{selectedApiTerm.description}</p>
-                      </div>
-                      <span className={`text-sm font-medium px-3 py-1.5 rounded-full whitespace-nowrap
-                        ${selectedApiTerm.type === 'load' 
-                          ? 'bg-green-50 text-green-600' 
-                          : 'bg-orange-50 text-orange-600'}`}
-                      >
-                        {selectedApiTerm.type.toUpperCase()}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </>
+              </div>
             )}
 
-            {/* Metrics Section - Enhanced for mobile */}
+            {/* Metrics - Compact for mobile */}
             {data.metrics && (
-              <>
-                <h3 className="text-xl sm:text-lg font-semibold text-gray-700 mb-4 sm:mb-3 mt-8 sm:mt-6">Metrics:</h3>
-                <div className="flex flex-wrap gap-4">
+              <div className="mt-4">
+                <h3 className="text-base font-semibold text-gray-700 mb-2">Metrics</h3>
+                <div className="flex flex-wrap gap-2">
                   {data.metrics.map((metric) => (
                     <button
                       key={metric.id}
@@ -530,29 +530,16 @@ const ScreenshotNode = ({ data }: NodeProps<NodeData>) => {
                         setSelectedTerm(null);
                         setSelectedApiTerm(null);
                       }}
-                      className={`px-5 py-3 sm:px-4 sm:py-2 rounded-full text-lg sm:text-base font-medium transition-colors w-full sm:w-auto
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors
                         ${selectedMetric?.id === metric.id 
-                          ? 'bg-amber-500 text-white shadow-md' 
-                          : 'bg-white text-amber-700 hover:bg-amber-50 border border-amber-200 shadow-sm'}`}
+                          ? 'bg-amber-500 text-white shadow-sm' 
+                          : 'bg-white text-amber-700 hover:bg-amber-50 border border-amber-200'}`}
                     >
                       {metric.term}
                     </button>
                   ))}
                 </div>
-
-                {/* Metric Description - Enhanced for mobile */}
-                {selectedMetric && (
-                  <div className="mt-6 sm:mt-4 p-5 sm:p-4 bg-white rounded-lg shadow-md border border-gray-100 mb-0">
-                    <div className="flex flex-col gap-2">
-                      <h4 className="text-lg font-medium text-gray-800">{selectedMetric.term}</h4>
-                      <p className="text-base text-gray-600">{selectedMetric.description}</p>
-                      <div className="mt-2 px-3 py-2 bg-amber-50 rounded-lg">
-                        <code className="text-amber-700 font-mono">{selectedMetric.formula}</code>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
+              </div>
             )}
           </div>
         )}
@@ -567,9 +554,13 @@ const nodeTypes = {
 
 export function MarketingFlow() {
   const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
+  const [currentNode, setCurrentNode] = useState(0);
+  const [selectedTerms, setSelectedTerms] = useState<{ [nodeId: string]: KeyTerm | null }>({});
+  const [selectedApiTerms, setSelectedApiTerms] = useState<{ [nodeId: string]: ApiTerm | null }>({});
+  const [selectedMetrics, setSelectedMetrics] = useState<{ [nodeId: string]: Metric | null }>({});
+  const containerRef = useRef<HTMLDivElement>(null);
   const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -580,110 +571,420 @@ export function MarketingFlow() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Adjust node positions based on screen size
-  const nodes = React.useMemo(() => {
-    if (isMobile) {
-      // Vertical layout for mobile
-      return initialNodes.map((node, index) => ({
-        ...node,
-        position: {
-          x: START_X,
-          y: Y_POSITION + (index * 800) // Increased vertical spacing for mobile
-        }
-      }));
-    }
-    return initialNodes;
-  }, [isMobile]);
+  const renderMobileNode = (node: Node<NodeData>) => (
+    <div key={node.id} className="min-w-full px-4 pt-4 bg-white">
+      <div className="bg-white">
+        <h2 className="text-xl font-semibold text-gray-800 text-center mb-4">
+          {node.data.label}
+        </h2>
 
-  // Adjust edges for mobile layout
-  const edges = React.useMemo(() => {
-    if (isMobile) {
-      return initialEdges.map(edge => ({
-        ...edge,
-        style: {
-          ...edge.style,
-          strokeWidth: 4, // Thicker lines for mobile
-        },
-        labelStyle: {
-          ...edge.labelStyle,
-          fontSize: 14, // Smaller font for mobile
-        }
-      }));
-    }
-    return initialEdges;
-  }, [isMobile]);
+        {/* Live Link Button */}
+        <div className="flex justify-center mb-4">
+          <a
+            href={node.data.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`inline-flex items-center gap-1 px-4 py-1.5 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors shadow-sm touch-manipulation w-auto justify-center mx-auto ${node.data.link === '#' || node.id === '1' ? 'invisible' : ''}`}
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            <span>Live Link</span>
+          </a>
+        </div>
+        
+        {/* Phone Frame */}
+        <div className="transform scale-90 mx-auto">
+          <div className="bg-gray-800 rounded-[40px] p-3 shadow-xl">
+            <div className="relative bg-black rounded-[35px] border-[6px] border-black overflow-hidden">
+              <img 
+                src={node.data.screenshot} 
+                alt={node.data.label}
+                className="w-full rounded-[28px]"
+              />
+            </div>
+          </div>
+        </div>
 
-  const handleTouchStart = (e: TouchEvent) => {
-    if (isMobile) {
-      setTouchStart({
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY
-      });
-      setIsDragging(true);
-    }
-  };
+        {/* Key Terms Section */}
+        <div className="mt-8 bg-gray-50 rounded-lg p-4 mb-8">
+          <h3 className="text-lg font-semibold text-gray-700 mb-3">Key Terms</h3>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {node.data.keyTerms?.map((term) => (
+              <button
+                key={term.id}
+                onClick={() => {
+                  setSelectedTerms(prev => ({
+                    ...prev,
+                    [node.id]: prev[node.id]?.id === term.id ? null : term
+                  }));
+                  setSelectedApiTerms(prev => ({ ...prev, [node.id]: null }));
+                  setSelectedMetrics(prev => ({ ...prev, [node.id]: null }));
+                }}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
+                  ${selectedTerms[node.id]?.id === term.id 
+                    ? 'bg-blue-500 text-white shadow-md' 
+                    : 'bg-white text-blue-700 hover:bg-blue-50 border border-blue-200 shadow-sm'}`}
+              >
+                {term.term}
+              </button>
+            ))}
+          </div>
 
-  const handleTouchMove = (e: TouchEvent) => {
-    if (isMobile && isDragging && containerRef.current) {
-      const deltaX = e.touches[0].clientX - touchStart.x;
-      const deltaY = e.touches[0].clientY - touchStart.y;
-      
-      // Smooth scrolling
-      containerRef.current.scrollBy({
-        left: -deltaX,
-        top: -deltaY,
-        behavior: 'smooth'
-      });
-      
-      setTouchStart({
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY
-      });
-    }
-  };
+          {selectedTerms[node.id] && (
+            <div className="mt-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-start justify-between">
+                  <h4 className="text-base font-medium text-gray-800">
+                    {selectedTerms[node.id]?.term}
+                  </h4>
+                  <span className="text-xs font-medium text-blue-600 px-2 py-1 bg-blue-50 rounded-full">
+                    #{selectedTerms[node.id]?.category}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {selectedTerms[node.id]?.description}
+                </p>
+                {selectedTerms[node.id]?.term === 'Keyword Block (Widget)' && (
+                  <div className="mt-2">
+                    <img 
+                      src={keywordBlockImage} 
+                      alt="Keyword Block Example"
+                      className="w-full rounded-lg shadow-sm"
+                    />
+                  </div>
+                )}
+                {selectedTerms[node.id]?.term === 'Click' && (
+                  <div className="mt-2">
+                    <img 
+                      src={clickArrowImage} 
+                      alt="Click Arrow Example"
+                      className="w-full rounded-lg shadow-sm"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-  };
+          {/* API Terms Section */}
+          {node.data.apiTerms && (
+            <div className="mt-4">
+              <h3 className="text-base font-semibold text-gray-700 mb-2">API Terms</h3>
+              <div className="flex flex-wrap gap-2">
+                {node.data.apiTerms.map((term) => (
+                  <button
+                    key={term.id}
+                    onClick={() => {
+                      setSelectedApiTerms(prev => ({
+                        ...prev,
+                        [node.id]: prev[node.id]?.id === term.id ? null : term
+                      }));
+                      setSelectedTerms(prev => ({ ...prev, [node.id]: null }));
+                      setSelectedMetrics(prev => ({ ...prev, [node.id]: null }));
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors
+                      ${selectedApiTerms[node.id]?.id === term.id 
+                        ? 'bg-purple-500 text-white shadow-md' 
+                        : 'bg-white text-purple-700 hover:bg-purple-50 border border-purple-200 shadow-sm'}`}
+                  >
+                    {term.term}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {selectedApiTerms[node.id] && (
+            <div className="mt-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-start justify-between">
+                  <h4 className="text-base font-medium text-gray-800">
+                    {selectedApiTerms[node.id]?.term}
+                  </h4>
+                  <span className="text-xs font-medium text-purple-600 px-2 py-1 bg-purple-50 rounded-full">
+                    {selectedApiTerms[node.id]?.type}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {selectedApiTerms[node.id]?.description}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Metrics Section */}
+          {node.data.metrics && (
+            <div className="mt-4">
+              <h3 className="text-base font-semibold text-gray-700 mb-2">Metrics</h3>
+              <div className="flex flex-wrap gap-2">
+                {node.data.metrics.map((metric) => (
+                  <button
+                    key={metric.id}
+                    onClick={() => {
+                      setSelectedMetrics(prev => ({
+                        ...prev,
+                        [node.id]: prev[node.id]?.id === metric.id ? null : metric
+                      }));
+                      setSelectedTerms(prev => ({ ...prev, [node.id]: null }));
+                      setSelectedApiTerms(prev => ({ ...prev, [node.id]: null }));
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors
+                      ${selectedMetrics[node.id]?.id === metric.id 
+                        ? 'bg-amber-500 text-white shadow-md' 
+                        : 'bg-white text-amber-700 hover:bg-amber-50 border border-amber-200 shadow-sm'}`}
+                  >
+                    {metric.term}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {selectedMetrics[node.id] && (
+            <div className="mt-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+              <div className="flex flex-col gap-2">
+                <h4 className="text-base font-medium text-gray-800">
+                  {selectedMetrics[node.id]?.term}
+                </h4>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {selectedMetrics[node.id]?.description}
+                </p>
+                <div className="mt-1 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-md">
+                  Formula: {selectedMetrics[node.id]?.formula}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <div className="w-full min-h-screen">
+        {/* Mobile Panels */}
+        <div 
+          className="flex transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(-${currentNode * 100}vw)` }}
+        >
+          {initialNodes.map((node) => (
+            <div key={node.id} className="min-w-full px-4 pt-4">
+              <div className="bg-white">
+                <h2 className="text-xl font-semibold text-gray-800 text-center mb-4">
+                  {node.data.label}
+                </h2>
+
+                {/* Live Link Button */}
+                <div className="flex justify-center mb-4">
+                  <a
+                    href={node.data.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center gap-1 px-4 py-1.5 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors shadow-sm touch-manipulation w-auto justify-center mx-auto ${node.data.link === '#' || node.id === '1' ? 'invisible' : ''}`}
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    <span>Live Link</span>
+                  </a>
+                </div>
+                
+                {/* Phone Frame */}
+                <div className="transform scale-90 mx-auto">
+                  <div className="bg-gray-800 rounded-[40px] p-3 shadow-xl">
+                    <div className="relative bg-black rounded-[35px] border-[6px] border-black overflow-hidden">
+                      <img 
+                        src={node.data.screenshot} 
+                        alt={node.data.label}
+                        className="w-full rounded-[28px]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Key Terms Section */}
+                <div className="mt-8 bg-gray-50 rounded-lg p-4 mb-8">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Key Terms</h3>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {node.data.keyTerms?.map((term) => (
+                      <button
+                        key={term.id}
+                        onClick={() => {
+                          setSelectedTerms(prev => ({
+                            ...prev,
+                            [node.id]: prev[node.id]?.id === term.id ? null : term
+                          }));
+                          setSelectedApiTerms(prev => ({ ...prev, [node.id]: null }));
+                          setSelectedMetrics(prev => ({ ...prev, [node.id]: null }));
+                        }}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
+                          ${selectedTerms[node.id]?.id === term.id 
+                            ? 'bg-blue-500 text-white shadow-md' 
+                            : 'bg-white text-blue-700 hover:bg-blue-50 border border-blue-200 shadow-sm'}`}
+                      >
+                        {term.term}
+                      </button>
+                    ))}
+                  </div>
+
+                  {selectedTerms[node.id] && (
+                    <div className="mt-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-start justify-between">
+                          <h4 className="text-base font-medium text-gray-800">
+                            {selectedTerms[node.id]?.term}
+                          </h4>
+                          <span className="text-xs font-medium text-blue-600 px-2 py-1 bg-blue-50 rounded-full">
+                            #{selectedTerms[node.id]?.category}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          {selectedTerms[node.id]?.description}
+                        </p>
+                        {selectedTerms[node.id]?.term === 'Keyword Block (Widget)' && (
+                          <div className="mt-2">
+                            <img 
+                              src={keywordBlockImage} 
+                              alt="Keyword Block Example"
+                              className="w-full rounded-lg shadow-sm"
+                            />
+                          </div>
+                        )}
+                        {selectedTerms[node.id]?.term === 'Click' && (
+                          <div className="mt-2">
+                            <img 
+                              src={clickArrowImage} 
+                              alt="Click Arrow Example"
+                              className="w-full rounded-lg shadow-sm"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* API Terms Section */}
+                  {node.data.apiTerms && (
+                    <div className="mt-4">
+                      <h3 className="text-base font-semibold text-gray-700 mb-2">API Terms</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {node.data.apiTerms.map((term) => (
+                          <button
+                            key={term.id}
+                            onClick={() => {
+                              setSelectedApiTerms(prev => ({
+                                ...prev,
+                                [node.id]: prev[node.id]?.id === term.id ? null : term
+                              }));
+                              setSelectedTerms(prev => ({ ...prev, [node.id]: null }));
+                              setSelectedMetrics(prev => ({ ...prev, [node.id]: null }));
+                            }}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors
+                              ${selectedApiTerms[node.id]?.id === term.id 
+                                ? 'bg-purple-500 text-white shadow-md' 
+                                : 'bg-white text-purple-700 hover:bg-purple-50 border border-purple-200 shadow-sm'}`}
+                          >
+                            {term.term}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedApiTerms[node.id] && (
+                    <div className="mt-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-start justify-between">
+                          <h4 className="text-base font-medium text-gray-800">
+                            {selectedApiTerms[node.id]?.term}
+                          </h4>
+                          <span className="text-xs font-medium text-purple-600 px-2 py-1 bg-purple-50 rounded-full">
+                            {selectedApiTerms[node.id]?.type}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          {selectedApiTerms[node.id]?.description}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Metrics Section */}
+                  {node.data.metrics && (
+                    <div className="mt-4">
+                      <h3 className="text-base font-semibold text-gray-700 mb-2">Metrics</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {node.data.metrics.map((metric) => (
+                          <button
+                            key={metric.id}
+                            onClick={() => {
+                              setSelectedMetrics(prev => ({
+                                ...prev,
+                                [node.id]: prev[node.id]?.id === metric.id ? null : metric
+                              }));
+                              setSelectedTerms(prev => ({ ...prev, [node.id]: null }));
+                              setSelectedApiTerms(prev => ({ ...prev, [node.id]: null }));
+                            }}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors
+                              ${selectedMetrics[node.id]?.id === metric.id 
+                                ? 'bg-amber-500 text-white shadow-md' 
+                                : 'bg-white text-amber-700 hover:bg-amber-50 border border-amber-200 shadow-sm'}`}
+                          >
+                            {metric.term}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedMetrics[node.id] && (
+                    <div className="mt-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+                      <div className="flex flex-col gap-2">
+                        <h4 className="text-base font-medium text-gray-800">
+                          {selectedMetrics[node.id]?.term}
+                        </h4>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          {selectedMetrics[node.id]?.description}
+                        </p>
+                        <div className="mt-1 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-md">
+                          Formula: {selectedMetrics[node.id]?.formula}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div 
-      ref={containerRef}
-      className="w-full h-[800px] md:h-[800px] sm:h-[2400px] touch-pan-y overscroll-none"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
+    <div className="w-full h-screen">
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={initialNodes}
+        edges={initialEdges}
         nodeTypes={nodeTypes}
         fitView
-        minZoom={isMobile ? 0.2 : 0.4}
-        maxZoom={1.5}
-        defaultViewport={{ zoom: isMobile ? 0.4 : 0.7, x: 0, y: 0 }}
+        minZoom={0.2}
+        maxZoom={2.0}
         fitViewOptions={{
-          padding: isMobile ? 0.1 : 0.3,
+          padding: 0.2,
           includeHiddenNodes: true,
-          minZoom: isMobile ? 0.2 : 0.4,
-          maxZoom: 1.5
+          minZoom: 0.2,
+          maxZoom: 2.0
         }}
-        className="touch-manipulation"
-        panOnDrag={!isMobile}
-        zoomOnScroll={!isMobile}
-        panOnScroll={true}
-        selectionOnDrag={false}
-        zoomOnDoubleClick={false}
       >
         <Background color="#aaa" gap={16} />
         <Controls 
-          showZoom={!isMobile}
-          className={`!bottom-4 ${isMobile ? '!left-4' : '!right-4'} !top-auto`}
+          showZoom={true}
+          className="!bottom-4 !right-4 !top-auto"
         />
-        <MiniMap 
-          style={{ background: '#f8f8f8' }}
-          className={isMobile ? 'hidden' : ''}
-        />
+        <MiniMap style={{ background: '#f8f8f8' }} />
       </ReactFlow>
     </div>
   );
